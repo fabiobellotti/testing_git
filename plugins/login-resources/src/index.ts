@@ -56,6 +56,7 @@ export const pages = [
   'password',
   'recovery',
   'selectWorkspace',
+  'twoFactorAuth',
   'join',
   'confirm',
   'confirmationSend',
