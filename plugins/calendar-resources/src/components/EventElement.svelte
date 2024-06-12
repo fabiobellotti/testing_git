@@ -16,7 +16,7 @@
   import calendar, { CalendarEventPresenter, Event } from '@hcengineering/calendar'
   import { Doc } from '@hcengineering/core'
   import { getClient } from '@hcengineering/presentation'
-  import { Component, MILLISECONDS_IN_MINUTE, showPopup, tooltip } from '@hcengineering/ui'
+  import { Component, MILLISECONDS_IN_MINUTE, deviceSizes, showPopup, tooltip } from '@hcengineering/ui'
   import view, { ObjectEditor } from '@hcengineering/view'
   import { showMenu } from '@hcengineering/view-resources'
   import { calendarByIdStore, isVisible } from '../utils'
@@ -26,7 +26,7 @@
   // export let hourHeight: number
   export let size: { width: number, height: number }
 
-  $: oneRow = size.height < 42 || event.allDay
+  $: oneRow = size.height < 25 || event.allDay
   $: narrow = event.dueDate - event.date < MILLISECONDS_IN_MINUTE * 25
   $: empty = size.width < 44
 
@@ -80,6 +80,7 @@
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    flex-wrap: wrap;
     width: 100%;
     height: 100%;
     min-width: 0;
