@@ -66,6 +66,7 @@
   export let adaptiveShrink: WidthType | null = null
   export let gap: 'medium' | 'large' = 'medium'
   export let stopPropagation: boolean = true
+  export let aria: string | undefined = label || undefined
 
   $: iconSize = iconProps?.size !== undefined ? iconProps.size : size && size === 'inline' ? 'inline' : 'small'
   $: iconRightSize = iconRightProps?.size !== undefined ? iconRightProps.size : 'x-small'
@@ -143,6 +144,7 @@
   style:height
   style:flex-shrink={shrink}
   style:padding
+  aria-label={aria}
   {title}
   type={kind === 'primary' ? 'submit' : 'button'}
   on:click={preventHandler}

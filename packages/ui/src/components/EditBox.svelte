@@ -22,6 +22,9 @@
   import Label from './Label.svelte'
   import { floorFractionDigits } from '../utils'
   import { themeStore } from '@hcengineering/theme'
+  import Button from './Button.svelte'
+  import IconDown from './icons/Down.svelte'
+  import IconUp from './icons/Up.svelte'
 
   export let id: string | undefined = undefined
   export let label: IntlString | undefined = undefined
@@ -56,7 +59,7 @@
       value = floorFractionDigits(Number(value), maxDigitsAfterPoint)
     }
   }
-  $: void translate(placeholder, placeholderParam ?? {}, $themeStore.language).then((res) => {
+  $: void translate(placeholder, placeholderParam ?? {}, $themeStore.language).then((res: string) => {
     phTraslate = res
   })
 
@@ -102,6 +105,14 @@
   export function focus (): void {
     input.focus()
   }
+
+  function handleArrowIncrement (direction: 'up' | 'down'): void {
+    if (typeof value === 'number') {
+      if (direction === 'up') value++
+      else if (direction === 'down') value--
+      handleInput()
+    }
+  }
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -137,6 +148,7 @@
   >
     {#if format === 'password'}
       <input
+        aria-label="Password Input"
         {disabled}
         style:width={maxWidth}
         id="userPassword"
@@ -153,7 +165,9 @@
         }}
       />
     {:else if format === 'number'}
+    <div class="flex-row-center justify-stretch p-1">
       <input
+        aria-label="Number Input"
         {disabled}
         style:width={maxWidth}
         bind:this={input}
@@ -169,8 +183,16 @@
           dispatch('blur', value)
         }}
       />
+      <div class="ml-2">
+        <Button icon={IconDown} size={'small'} on:click={() => handleArrowIncrement('down')} aria="Decrease" />
+      </div>
+      <div class="ml-2">
+        <Button icon={IconUp} size={'small'} on:click={() => handleArrowIncrement('up')} aria="Increase" />
+      </div>
+    </div>
     {:else}
       <input
+        aria-label="Text Input"
         {disabled}
         style:width={maxWidth}
         bind:this={input}
