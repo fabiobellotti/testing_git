@@ -35,6 +35,9 @@ export class CommonRecruitingPage extends CalendarPage {
   readonly buttonContactLinkedIn = (): Locator =>
     this.page.locator('div[class^="popupPanel-body"] div.horizontal button[id="contact:string:LinkedIn"]')
 
+  readonly buttonContactGithub = (): Locator =>
+    this.page.locator('div[class^="popupPanel-body"] div.horizontal button[id="contact:string:GitHub"]')
+
   readonly newTalentFirstName = (): Locator =>
     this.page.locator('div.popup form[id="recruit:string:CreateTalent"] input[placeholder="First name"]')
 
@@ -63,6 +66,7 @@ export class CommonRecruitingPage extends CalendarPage {
   readonly reviewItemLink = (reviewId: string): Locator => this.page.locator(`tr:has-text('${reviewId}') td a`)
   readonly twoMembersButton = (): Locator => this.page.locator('button:has-text("2 members")')
   readonly chenRosamundPopupButton = (): Locator => this.page.locator('.popup button:has-text("Chen Rosamund")')
+  readonly buttonClearFilters = (): Locator => this.page.locator('button > span', { hasText: 'Clear filters' })
 
   async clickOnTitle (): Promise<void> {
     await this.title().click()
@@ -89,6 +93,11 @@ export class CommonRecruitingPage extends CalendarPage {
   }
 
   async createApplication (): Promise<void> {
+    await this.createButton().click()
+    await this.page.waitForSelector('form.antiCard', { state: 'detached' })
+  }
+
+  async confirmCreateReview (): Promise<void> {
     await this.createButton().click()
     await this.page.waitForSelector('form.antiCard', { state: 'detached' })
   }
@@ -142,14 +151,14 @@ export class CommonRecruitingPage extends CalendarPage {
     await this.pressYesDeletePopup(this.page)
   }
 
-  async addSocialLinks (link: string, linkDescription: string): Promise<void> {
+  async openAddSocialLinksPopup (link: string, linkDescription: string): Promise<void> {
     await this.buttonAddSocialLinks().click()
     await this.selectFromDropdown(this.page, link)
     await this.fillToDropdown(this.page, linkDescription)
   }
 
   async addSocialLink (social: SocialLink): Promise<void> {
-    await this.addSocialLinks(social.type, social.value)
+    await this.openAddSocialLinksPopup(social.type, social.value)
   }
 
   async checkSocialLinks (link: string, value: string): Promise<void> {
@@ -169,6 +178,12 @@ export class CommonRecruitingPage extends CalendarPage {
       case 'LinkedIn':
         await expect(this.buttonContactLinkedIn()).toBeVisible()
         await this.buttonContactLinkedIn().click()
+        await expect(this.inputSocialValue()).toHaveValue(value)
+        await this.buttonSocialSave().click()
+        break
+      case 'Github':
+        await expect(this.buttonContactGithub()).toBeVisible()
+        await this.buttonContactGithub().click()
         await expect(this.inputSocialValue()).toHaveValue(value)
         await this.buttonSocialSave().click()
         break

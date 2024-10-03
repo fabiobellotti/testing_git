@@ -49,9 +49,11 @@ export class CommonPage {
   menuPopupItemButton = (itemText: string): Locator =>
     this.page.locator('div.selectPopup button.menu-item', { hasText: itemText })
 
-  buttonFilter = (): Locator => this.page.getByRole('button', { name: 'Filter' })
+  buttonFilter = (): Locator => this.page.locator('.hulyHeader-container button:has-text("Filter")')
   inputFilterTitle = (): Locator => this.page.locator('div.selectPopup input[placeholder="Title"]')
+  inputFilterSource = (): Locator => this.page.locator('div.selectPopup input[placeholder="Source"]')
   inputFilterName = (): Locator => this.page.locator('div.selectPopup input[placeholder="Name"]')
+  inputFilter = (name: string): Locator => this.page.locator(`div.selectPopup input[placeholder="${name}"]`)
   inputSearch = (): Locator => this.page.locator('div.selectPopup input[placeholder="Search..."]')
   buttonFilterApply = (): Locator => this.page.locator('div.selectPopup button[type="button"]', { hasText: 'Apply' })
   buttonClearFilters = (): Locator => this.page.locator('button > span', { hasText: 'Clear filters' })
@@ -227,10 +229,18 @@ export class CommonPage {
         case 'Labels':
           await this.selectFromDropdown(this.page, filterSecondLevel)
           break
+        case 'Location':
+          await this.inputFilter(filter).fill(filterSecondLevel)
+          await this.buttonFilterApply().click()
+          break
         case 'Skills':
           await this.inputSearch().fill(filterSecondLevel)
           await this.selectFromDropdown(this.page, filterSecondLevel)
           await this.page.keyboard.press('Escape')
+          break
+        case 'Source':
+          await this.inputFilterSource().fill(filterSecondLevel)
+          await this.buttonFilterApply().click()
           break
         default:
           await this.selectPopupMenu(filterSecondLevel).click()
@@ -238,11 +248,13 @@ export class CommonPage {
     }
   }
 
-  async filterOppositeCondition (filter: string, conditionBefore: string, conditionAfter: string): Promise<void> {
+  async filterOppositeCondition (filter: string, conditionBefore: string, conditionAfter?: string): Promise<void> {
     const filterSection = this.selectFilterSection(filter)
     await filterSection.locator('button', { hasText: conditionBefore }).isVisible()
-    await filterSection.locator('button[data-id="btnCondition"]').click()
-    await this.page.locator('div.selectPopup button.menu-item', { hasText: conditionAfter }).click()
+    if (typeof conditionAfter === 'string') {
+      await filterSection.locator('button[data-id="btnCondition"]').click()
+      await this.page.locator('div.selectPopup button.menu-item', { hasText: conditionAfter }).click()
+    }
   }
 
   async checkFilter (filter: string, filterSecondLevel?: string, filterThirdLevel?: string): Promise<void> {
@@ -252,6 +264,24 @@ export class CommonPage {
     }
     if (filterThirdLevel !== undefined) {
       await expect(this.filterButton(3)).toContainText(filterThirdLevel)
+    }
+  }
+
+  async checkFilterWithInitials (filter: string, filterSecondLevel?: string, filterThirdLevel?: string): Promise<void> {
+    await expect(this.filterButton(1)).toHaveText(filter)
+    if (filterSecondLevel !== undefined) {
+      await expect(this.filterButton(2)).toContainText(filterSecondLevel)
+    }
+    if (filterThirdLevel !== undefined) {
+      const avatarWrapper = this.filterButton(3).locator(`[data-name="${filterThirdLevel}"]`)
+
+      const content = avatarWrapper.evaluate((elem) => {
+        const computedStyle = window.getComputedStyle(elem, '::after')
+        return computedStyle.getPropertyValue('content')
+      })
+
+      // Pseudoelement returns content "\"AJ\"
+      expect(await content).toEqual(JSON.stringify(filterThirdLevel))
     }
   }
 
